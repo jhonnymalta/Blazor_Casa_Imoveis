@@ -1,0 +1,73 @@
+﻿@page "/categories"
+@using AutoMapper
+@using Blazor_Casa_Imoveis.Models.DTOs
+@using Blazor_Casa_Imoveis.Repositories.IRepositories
+@inject ICategoryRepository categoryRepository;
+<h3>Categorias</h3>
+<div class="card">
+    <div class="card-header">
+        <div class="container">
+            <div class="row">
+                <div class="col-10">
+                    <h2>Category List</h2>
+                </div>
+                <div class="col-2">
+                    <NavLink href="/categories/create" class="btn btn-primary"><i class="bi bi-plus-circle"></i>&nbsp; Create New</NavLink>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Actions</th>
+                   
+                </tr>
+            </thead>
+            <tbody>
+                @if(categories != null)
+                {
+                    foreach (var item in categories)
+                    {
+                        <tr>
+                            <th scope="row">@item.Name</th>
+                            <td>@item.Description</td>
+                            <td>
+                                <NavLink href="@($"edit-category/{item.Id}")" class="btn btn-outline-success"><i class="bi bi-pencil-fill"></i>&nbsp Edit</NavLink>
+                                <button class="btn btn-outline-warning" onclick="()=>RemoveCategory(@item.Id)"><i class="bi bi-trash-fill"></i>Delete</button>
+
+                            </td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <p>EMPYT LIST</p>
+                    </tr>
+                }
+
+                
+                
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+@code {
+    private IEnumerable<CategoryDTO> categories { get; set; } = new List<CategoryDTO>();
+
+    protected override  async Task OnInitializedAsync()
+    {
+        categories = await categoryRepository.GetAll();
+    }
+    private async Task RemoveCategory(int Id)
+    {
+        
+    }
+}

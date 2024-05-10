@@ -1,0 +1,88 @@
+﻿@page "/categories/create"
+@using AutoMapper
+@using Blazor_Casa_Imoveis.Models.DTOs
+@using Blazor_Casa_Imoveis.Repositories.IRepositories
+@inject ICategoryRepository categoryRepository;
+@inject NavigationManager navigationManager;
+@inject IJSRuntime jsRuntime;
+
+<h3>Categorias</h3>
+<div class="card">
+    <div class="card-header">
+        <div class="container">
+            <div class="row">
+                <div class="col-10">
+                    <h2>Create new Category</h2>
+                </div>
+                <div class="col-2">
+                    <NavLink href="new-category" class="btn btn-outline-warning"><i class="bi bi-arrow-left-circle-fill"></i>&nbsp; Back</NavLink>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <EditForm Model="category" OnValidSubmit="@(()=>CreateNewCategory())">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <ValidationSummary></ValidationSummary>
+            <div class="container">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-2">
+                            <label>Category Name:</label>
+                        </div>
+                        <div class="col-6">
+                            <input @bind-value="category.Name" class="form-control" placeholder="Type category name"></input>
+                            <ValidationMessage For="() => category.Name"></ValidationMessage>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-2">
+                            <label>Description:</label>
+                        </div>
+                        <div class="col-6">
+                            <input @bind-value="category.Description" class="form-control" ></input>
+                            <ValidationMessage For="() => category.Description"></ValidationMessage>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-outline-success"><i class="bi bi-file"></i>&nbsp; Create</button>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+        
+    </div>
+
+</div>
+
+@code {
+    private CategoryDTO category { get; set; } = new CategoryDTO();
+    private bool confirmCreate { get; set; }
+
+    private async Task CreateNewCategory()
+    {
+        confirmCreate = await jsRuntime.InvokeAsync<bool>("confirm", "Create this category?");
+        if (confirmCreate)
+        {
+            var categoryExists = await categoryRepository.Exist(category.Name);
+            if (categoryExists != null) return;
+
+            var newCategory = await categoryRepository.Create(category);
+            await JobSuccess();
+            navigationManager.NavigateTo("categories");
+        }
+
+
+    }
+    private async Task JobSuccess()
+    {
+        await jsRuntime.InvokeVoidAsync("ShowToastr", "success","Ok");
+    }
+    private async Task JobError()
+    {
+        await jsRuntime.InvokeVoidAsync("ShowToastr", "error","not ok");
+    }
+}
