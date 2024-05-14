@@ -10,7 +10,7 @@ namespace Blazor_Casa_Imoveis.Repositories.IRepositories
         public Task<CategoryDTO> Update(int Id,CategoryDTO categoryDTO);
         public Task<CategoryDTO> Exist(string categoryName);
         public Task<bool> Delete(int categoryId);
-       // public Task<IEnumerable<CategoryDTO>> DropDown();
+        public Task<IEnumerable<DropDownCategoriaDTO>> DropDown();
 
     }
 }

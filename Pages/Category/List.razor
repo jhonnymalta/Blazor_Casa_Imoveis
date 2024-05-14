@@ -3,6 +3,7 @@
 @using Blazor_Casa_Imoveis.Models.DTOs
 @using Blazor_Casa_Imoveis.Repositories.IRepositories
 @inject ICategoryRepository categoryRepository;
+@inject NavigationManager navigationManager;
 <h3>Categorias</h3>
 <div class="card">
     <div class="card-header">
@@ -37,7 +38,7 @@
                             <td>@item.Description</td>
                             <td>
                                 <NavLink href="@($"edit-category/{item.Id}")" class="btn btn-outline-success"><i class="bi bi-pencil-fill"></i>&nbsp Edit</NavLink>
-                                <button class="btn btn-outline-warning" onclick="()=>RemoveCategory(@item.Id)"><i class="bi bi-trash-fill"></i>Delete</button>
+                                <button class="btn btn-outline-warning" @onclick="@(()=>RemoveCategory(item.Id))"><i class="bi bi-trash-fill"></i>Delete</button>
 
                             </td>
 
@@ -60,6 +61,8 @@
 </div>
 
 @code {
+    [Parameter]
+    public int Id { get; set; }
     private IEnumerable<CategoryDTO> categories { get; set; } = new List<CategoryDTO>();
 
     protected override  async Task OnInitializedAsync()
@@ -68,6 +71,7 @@
     }
     private async Task RemoveCategory(int Id)
     {
-        
+        await categoryRepository.Delete(Id);
+        categories = await categoryRepository.GetAll();
     }
 }

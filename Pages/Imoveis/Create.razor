@@ -1,0 +1,195 @@
+﻿@page "/imoveis/create"
+@using AutoMapper
+@using Blazor_Casa_Imoveis.Models.DTOs
+@using Blazor_Casa_Imoveis.Repositories.IRepositories
+@using Blazor_Casa_Imoveis.Services
+@inject IImovelRepository imovelRepository;
+@inject ICategoryRepository categoryRepository;
+@inject IUpFileService upFileService;
+@inject NavigationManager navigationManager;
+@inject IJSRuntime jsRuntime;
+
+<h3>Categorias</h3>
+<div class="card">
+    <div class="card-header">
+        <div class="container">
+            <div class="row">
+                <div class="col-10">
+                    <h2>Create new Category</h2>
+                </div>
+                <div class="col-2">
+                    <NavLink href="new-category" class="btn btn-outline-warning"><i class="bi bi-arrow-left-circle-fill"></i>&nbsp; Back</NavLink>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <EditForm Model="imovel" OnValidSubmit="@(()=>CreateNewImovel())">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <ValidationSummary></ValidationSummary>
+            <div class="container">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-2">
+                            <label>Category:</label>
+                        </div>
+                        <div class="col-6">
+                            <InputSelect @bind-Value="imovel.CategoryId" id="cars">
+                                <option value="">Select a Category</option>
+                                @foreach (var item in dropDownList)
+                                {
+                                    <option value="@item.Id">@item.Name</option>
+                                }
+
+                                
+                            </InputSelect>
+                            <ValidationMessage For="() => imovel.Area"></ValidationMessage>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-2">
+                            <label>Área:</label>
+                        </div>
+                        <div class="col-6">
+                            <input @bind-value="imovel.Area" class="form-control" placeholder="Type area"></input>
+                            <ValidationMessage For="() => imovel.Area"></ValidationMessage>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-2">
+                            <label>Quartos:</label>
+                        </div>
+                        <div class="col-6">
+                            <input @bind-value="imovel.Quartos" class="form-control"></input>
+                            <ValidationMessage For="() => imovel.Quartos"></ValidationMessage>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-2">
+                            <label>Vagas:</label>
+                        </div>
+                        <div class="col-6">
+                            <input @bind-value="imovel.Vagas" class="form-control"></input>
+                            <ValidationMessage For="() => imovel.Vagas"></ValidationMessage>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-2">
+                            <label>Preco:</label>
+                        </div>
+                        <div class="col-6">
+                            <input type="number" @bind-value="imovel.Preco" class="form-control"></input>
+                            <ValidationMessage For="() => imovel.Preco"></ValidationMessage>
+                        </div>
+                    </div>
+                    <div class="form-group" style="padding-top:30px;padding-bottom:30px">
+                        <hr/>
+                        <h2>Imóvel Images</h2>
+                        <InputFile OnChange="SubirImagens" multiple></InputFile>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-outline-success"><i class="bi bi-file"></i>&nbsp; Create</button>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+        
+    </div>
+
+</div>
+
+@code {
+    private ImovelDTO imovel { get; set; } = new ImovelDTO();
+    private DropDownCategoriaDTO selectedCategory = new DropDownCategoriaDTO();
+    private bool confirmCreate { get; set; }
+    private bool uploadImageStarted { get; set; }
+
+
+    private IEnumerable<DropDownCategoriaDTO> dropDownList { get; set; } = new List<DropDownCategoriaDTO>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        dropDownList = await categoryRepository.DropDown();
+    }
+
+
+
+    private async Task CreateNewImovel()
+    {
+        confirmCreate = await jsRuntime.InvokeAsync<bool>("confirm", "Create this category?");
+        if (confirmCreate)
+        {     
+
+            var newImovel = await imovelRepository.Create(imovel);
+            await JobSuccess();
+            navigationManager.NavigateTo("imoveis");
+        }
+
+
+    }
+    private async Task JobSuccess()
+    {
+        await jsRuntime.ToastrSuccess("Task Complet.");
+        await jsRuntime.InvokeVoidAsync("ShowSwal", "success", "Completed Task.");
+    }
+    private async Task JobError()
+    {       
+        await jsRuntime.ToastrError("failed to complet the task.");
+        await jsRuntime.InvokeVoidAsync("ShowSwal", "error", "Task failed");
+    }
+
+    private async Task SubirImagens(InputFileChangeEventArgs e)
+    {
+        uploadImageStarted = true;
+        try
+        {
+            var imagens = new List<string>();
+            if(e.GetMultipleFiles().Count() > 0)
+            {
+                foreach (var file in e.GetMultipleFiles())
+                {
+                    System.IO.FileInfo fileInfo = new System.IO.FileInfo(file.Name);
+                    if(fileInfo.Extension.ToLower()==".jpg" ||
+                        fileInfo.Extension.ToLower() == ".png" ||
+                        fileInfo.Extension.ToLower() == ".jpeg")
+                    {
+                        var uploadedImagemPath = await upFileService.UpFile(file);
+                        imagens.Add(uploadedImagemPath);
+                    }
+                    else
+                    {
+                        await jsRuntime.ToastrError("File extension must be .jpg/ . jpe");
+                        return;
+                    }
+                }
+                if (imagens.Any())
+                {
+                    if(imovel.UrlImagens != null && imovel.UrlImagens.Any())
+                    {
+                        imovel.UrlImagens.AddRange(imagens);
+                    }
+                    else
+                    {
+                        imovel.UrlImagens = new List<string>(imagens);
+                        imovel.UrlImagens.AddRange(imagens);
+                    }
+                }
+                else
+                {
+                    await jsRuntime.ToastrError("Upload Failded.");
+                    return;
+                }
+            }
+            uploadImageStarted = false;
+        }
+        catch (Exception)
+        {
+            
+            throw;
+        }
+    }
+}

@@ -2,6 +2,7 @@ using Blazor_Casa_Imoveis.Areas.Identity;
 using Blazor_Casa_Imoveis.Data;
 using Blazor_Casa_Imoveis.Repositories;
 using Blazor_Casa_Imoveis.Repositories.IRepositories;
+using Blazor_Casa_Imoveis.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -27,6 +28,9 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuth
 
 //repositories
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IImovelRepository, ImovelRepository>();
+builder.Services.AddScoped<IImovelImageRepository, ImovelImageRepository>();
+builder.Services.AddScoped<IUpFileService, UpFileService>();
 
 var app = builder.Build();
 

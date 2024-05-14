@@ -9,6 +9,9 @@ namespace Blazor_Casa_Imoveis.Mapper
         public PerfilMapper()
         {
             CreateMap<CategoryDTO, Category>().ReverseMap();
+            CreateMap<ImovelDTO, Imovel>().ReverseMap();
+            CreateMap<DropDownCategoriaDTO, Category>().ReverseMap();
+            CreateMap<ImovelImageDTO, ImovelImage>().ReverseMap();
         }
     }
 }

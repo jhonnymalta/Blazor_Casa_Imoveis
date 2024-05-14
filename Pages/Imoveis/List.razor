@@ -1,0 +1,78 @@
+﻿@page "/imoveis"
+@using AutoMapper
+@using Blazor_Casa_Imoveis.Models.DTOs
+@using Blazor_Casa_Imoveis.Repositories.IRepositories
+@inject IImovelRepository imovelRepository;
+@inject NavigationManager navigationManager;
+<h3>Categorias</h3>
+<div class="card">
+    <div class="card-header">
+        <div class="container">
+            <div class="row">
+                <div class="col-10">
+                    <h2>Imóveis List</h2>
+                </div>
+                <div class="col-2">
+                    <NavLink href="/imoveis/create" class="btn btn-primary"><i class="bi bi-plus-circle"></i>&nbsp; Create New</NavLink>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Áres m²</th>
+                    <th scope="col">Quartos</th>
+                    <th scope="col">Preço</th>
+                   
+                </tr>
+            </thead>
+            <tbody>
+                @if(imoveis != null)
+                {
+                    foreach (var item in imoveis)
+                    {
+                        <tr>
+                            <th scope="row">@item.Area</th>
+                            <td>@item.Quartos</td>
+                            <td>@item.Preco</td>
+                            <td>
+                                <NavLink href="@($"edit-imovel/{item.Id}")" class="btn btn-outline-success"><i class="bi bi-pencil-fill"></i>&nbsp Edit</NavLink>
+                                <button class="btn btn-outline-warning" @onclick="@(()=>RemoveImovel(item.Id))"><i class="bi bi-trash-fill"></i>Delete</button>
+
+                            </td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <p>EMPYT LIST</p>
+                    </tr>
+                }
+
+                
+                
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private IEnumerable<ImovelDTO> imoveis { get; set; } = new List<ImovelDTO>();
+
+    protected override  async Task OnInitializedAsync()
+    {
+        imoveis = await imovelRepository.GetAll();
+    }
+    private async Task RemoveImovel(int Id)
+    {
+        await imovelRepository.Delete(Id);
+        imoveis = await imovelRepository.GetAll();
+    }
+}

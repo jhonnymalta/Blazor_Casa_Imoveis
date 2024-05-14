@@ -39,6 +39,21 @@ namespace Blazor_Casa_Imoveis.Repositories
             return false;
         }
 
+        public async Task<IEnumerable<DropDownCategoriaDTO>> DropDown()
+        {
+            try
+            {
+                var categories = _mapper.Map<IEnumerable<DropDownCategoriaDTO>>(_context.Categories.ToList());
+                return _mapper.Map<IEnumerable<DropDownCategoriaDTO>>(categories);
+            }
+            catch (Exception ex)
+            {
+
+                return null;
+            }
+
+        }
+
         public async Task<CategoryDTO> Exist(string categoryName)
         {
             try

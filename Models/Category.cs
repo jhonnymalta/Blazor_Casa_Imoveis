@@ -12,5 +12,7 @@ namespace Blazor_Casa_Imoveis.Models
         public string Description { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; }
+
+        public virtual ICollection<Imovel> Imoveis { get; set; }
     }
 }

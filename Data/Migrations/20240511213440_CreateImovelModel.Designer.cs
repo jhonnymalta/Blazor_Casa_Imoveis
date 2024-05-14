@@ -4,6 +4,7 @@ using Blazor_Casa_Imoveis.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Blazor_Casa_Imoveis.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240511213440_CreateImovelModel")]
+    partial class CreateImovelModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -82,27 +85,6 @@ namespace Blazor_Casa_Imoveis.Data.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Imoveis");
-                });
-
-            modelBuilder.Entity("Blazor_Casa_Imoveis.Models.ImovelImage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ImovelId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UrlImovelImage")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ImovelId");
-
-                    b.ToTable("ImovelImages");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -318,17 +300,6 @@ namespace Blazor_Casa_Imoveis.Data.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Blazor_Casa_Imoveis.Models.ImovelImage", b =>
-                {
-                    b.HasOne("Blazor_Casa_Imoveis.Models.Imovel", "Imovel")
-                        .WithMany("ImovelImages")
-                        .HasForeignKey("ImovelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Imovel");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -383,11 +354,6 @@ namespace Blazor_Casa_Imoveis.Data.Migrations
             modelBuilder.Entity("Blazor_Casa_Imoveis.Models.Category", b =>
                 {
                     b.Navigation("Imoveis");
-                });
-
-            modelBuilder.Entity("Blazor_Casa_Imoveis.Models.Imovel", b =>
-                {
-                    b.Navigation("ImovelImages");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,10 +1,10 @@
-﻿@page "/categories/create"
+﻿@page "/edit-imovel/{id:int}"
+
 @using AutoMapper
 @using Blazor_Casa_Imoveis.Models.DTOs
 @using Blazor_Casa_Imoveis.Repositories.IRepositories
 @inject ICategoryRepository categoryRepository;
 @inject NavigationManager navigationManager;
-@inject IJSRuntime jsRuntime;
 
 <h3>Categorias</h3>
 <div class="card">
@@ -12,7 +12,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-10">
-                    <h2>Create new Category</h2>
+                    <h2>Edit Category</h2>
                 </div>
                 <div class="col-2">
                     <NavLink href="new-category" class="btn btn-outline-warning"><i class="bi bi-arrow-left-circle-fill"></i>&nbsp; Back</NavLink>
@@ -21,7 +21,7 @@
         </div>
     </div>
     <div class="card-body">
-        <EditForm Model="category" OnValidSubmit="@(()=>CreateNewCategory())">
+        <EditForm Model="category" OnValidSubmit="@(()=>EditCategory())">
             <DataAnnotationsValidator></DataAnnotationsValidator>
             <ValidationSummary></ValidationSummary>
             <div class="container">
@@ -40,7 +40,7 @@
                             <label>Description:</label>
                         </div>
                         <div class="col-6">
-                            <input @bind-value="category.Description" class="form-control" ></input>
+                            <input @bind-value="category.Description" class="form-control"></input>
                             <ValidationMessage For="() => category.Description"></ValidationMessage>
                         </div>
                     </div>
@@ -48,47 +48,46 @@
                         <div class="col-12">
                             <button type="submit" class="btn btn-outline-success"><i class="bi bi-file"></i>&nbsp; Create</button>
                         </div>
-                        
+
                     </div>
                 </div>
             </div>
         </EditForm>
-        
+
     </div>
 
 </div>
 
 @code {
+    [Parameter]
+    public int Id { get; set; }
     private CategoryDTO category { get; set; } = new CategoryDTO();
-    private bool confirmCreate { get; set; }
 
-    private async Task CreateNewCategory()
+    protected override async Task OnInitializedAsync()
     {
-        confirmCreate = await jsRuntime.InvokeAsync<bool>("confirm", "Create this category?");
-        if (confirmCreate)
+        if (Id != null) category = await categoryRepository.GetById(Id);
+
+    }
+
+
+    private async Task EditCategory()
+    {
+        try
         {
             var categoryExists = await categoryRepository.Exist(category.Name);
-            if (categoryExists != null)
-            {
-                JobError();
-                return;
-            };
-
-            var newCategory = await categoryRepository.Create(category);
-            await JobSuccess();
+            if (categoryExists != null) return;
+            var categoryUpdated = await categoryRepository.Update(Id,category);
             navigationManager.NavigateTo("categories");
+
         }
+        catch (Exception ex)
+        {
+            
+            return ;
+        }
+        
 
+        navigationManager.NavigateTo("categories");
 
-    }
-    private async Task JobSuccess()
-    {
-        await jsRuntime.ToastrSuccess("Task Complet.");
-        await jsRuntime.InvokeVoidAsync("ShowSwal", "success", "Completed Task.");
-    }
-    private async Task JobError()
-    {       
-        await jsRuntime.ToastrError("failed to complet the task.");
-        await jsRuntime.InvokeVoidAsync("ShowSwal", "error", "Task failed");
     }
 }
